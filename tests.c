@@ -8,18 +8,18 @@
 void TestInsertAndGet() 
 {
     struct hashTable table = {};
-    hashTableCtor(&table, MurmurHashFunction, 10, LINEAR_PROBE);
+    hashTableCtor(&table, MurmurHashFunction, 10, HASH_PROBE);
 
     hashTableInsert(&table, "apple", 50);
     hashTableInsert(&table, "banana", 200);
     hashTableInsert(&table, "cherry", 300);
 
-    //hashTableDumpToFile(&table, "log_file.log");
+    hashTableDumpToFile(&table, "log_file.log");
 
     assert(hashTableGet(&table, "apple") == 50);
     assert(hashTableGet(&table, "banana") == 200);
     assert(hashTableGet(&table, "cherry") == 300);
-    assert(hashTableGet(&table, "grape") == -1); // Должно вернуть -1 (не найдено)
+    assert(hashTableGet(&table, "grape") == -1);
 
     printf("✅ testInsertAndGet PASSED\n");
 
@@ -29,7 +29,7 @@ void TestInsertAndGet()
 void TestRemove() 
 {
     struct hashTable table = {};
-    hashTableCtor(&table, MurmurHashFunction, 10, LINEAR_PROBE);
+    hashTableCtor(&table, MurmurHashFunction, 10, HASH_PROBE);
 
     hashTableInsert(&table, "apple", 100);
     hashTableDumpToFile(&table, "log_file.log");
@@ -37,7 +37,7 @@ void TestRemove()
     hashTableRemove(&table, "apple");
     hashTableDumpToFile(&table, "log_file.log");
 
-    assert(hashTableGet(&table, "apple") == -1); // Должно быть удалено
+    assert(hashTableGet(&table, "apple") == -1);
 
     printf("✅ testRemove PASSED\n");
 
@@ -47,7 +47,7 @@ void TestRemove()
 void TestCollisions() 
 {
     struct hashTable table = {};
-    hashTableCtor(&table, MurmurHashFunction, 5, LINEAR_PROBE); // Маленький размер для создания коллизий
+    hashTableCtor(&table, MurmurHashFunction, 11, HASH_PROBE); // Маленький размер для создания коллизий
 
     hashTableInsert(&table, "one", 1);
     hashTableInsert(&table, "two", 2);
@@ -71,13 +71,13 @@ void TestCollisions()
 void TestResize() 
 {
     struct hashTable table = {};
-    hashTableCtor(&table, MurmurHashFunction, 2, LINEAR_PROBE); // Начнём с маленькой таблицы
+    hashTableCtor(&table, MurmurHashFunction, 2, HASH_PROBE); 
 
-    hashTableInsert(&table, "a", 1);
-    hashTableInsert(&table, "b", 2);
+    hashTableInsert(&table, "a", 1); // Должно вызвать увеличение таблицы
     hashTableDumpToFile(&table, "log_file.log");
 
-    hashTableInsert(&table, "c", 3); // Должно вызвать увеличение таблицы
+    hashTableInsert(&table, "b", 2);
+    hashTableInsert(&table, "c", 3); 
     hashTableDumpToFile(&table, "log_file.log");
 
     hashTableInsert(&table, "d", 4); // Должно вызвать увеличение таблицы

@@ -95,7 +95,10 @@ int hashTableRemove(struct hashTable* hash_table, const char* key)
 //============================================================================
 int hashTableProbe(struct hashTable* hash_table, enum PROBE_MODE probe_mode, const char* key, int value)
 {
-    int index = hash_table->hash_function(key, hash_table->capacity) % hash_table->capacity;
+    int hash1 = hash_table->hash_function(key, hash_table->capacity);
+    int hash2 = 1 + (hash1 % (hash_table->capacity - 1));
+
+    int index = hash1 % hash_table->capacity;
     int offset = 0;
 
     while(hash_table->keys[index] != NULL)
@@ -150,6 +153,9 @@ int hashTableProbe(struct hashTable* hash_table, enum PROBE_MODE probe_mode, con
                 break;
             case(QUADRATIC_PROBE):
                 index = (index + offset*offset) % hash_table->capacity;
+                break;
+            case(HASH_PROBE):
+                index = (index + offset*hash2) % hash_table->capacity;
                 break;
         }
     }
