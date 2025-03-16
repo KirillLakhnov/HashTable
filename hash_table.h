@@ -8,6 +8,11 @@
 
 #define DELETED_ELEMENT (char*)-1
 
+enum MODE_PRIME {
+    NEAREST_LESSER = 0,
+    NEAREST_BIGGER = 1,
+};
+
 enum PROBE {
     LINEAR_PROBE    = 0,
     QUADRATIC_PROBE = 1,
@@ -65,5 +70,9 @@ long long int hashTableIteratorHasPrev(struct hashTableIterator* hash_table_iter
 const char* hashTableIteratorNext(struct hashTableIterator* hash_table_iterator, int* value);
 const char* hashTableIteratorPrev(struct hashTableIterator* hash_table_iterator, int* value);
 //============================================================================
+int IsPrime(size_t n);
+size_t FindNearestPrime(size_t n, enum MODE_PRIME mode);
+//============================================================================
+
 
 #endif //HASH_TABLE

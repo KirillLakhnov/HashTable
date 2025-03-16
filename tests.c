@@ -47,7 +47,7 @@ void TestRemove()
 void TestCollisions() 
 {
     struct hashTable table = {};
-    hashTableCtor(&table, MurmurHashFunction, 11, HASH_PROBE); // Маленький размер для создания коллизий
+    hashTableCtor(&table, MurmurHashFunction, 10, HASH_PROBE); // Маленький размер для создания коллизий
 
     hashTableInsert(&table, "one", 1);
     hashTableInsert(&table, "two", 2);
