@@ -496,12 +496,6 @@ int MurmurHashFunction(const char* key, int hash_table_capacity)
 
     return (int)(hash % hash_table_capacity);  // Приводим хеш к диапазону
 }
-
-int SDBMHashFunction(const char* key, int hash_table_capacity)
-{
-    return 0;
-}
-
 //============================================================================
 void hashTableIteratorInit(struct hashTableIterator* hash_table_iterator, struct hashTable* hash_table)
 {
