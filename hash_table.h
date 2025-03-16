@@ -29,7 +29,7 @@ struct hashTable
 
     int (*hash_function)(const char*, int);
 
-    int (*probe_function)(struct hashTable*, enum PROBE_MODE, const char*, int);
+    enum PROBE probe;
 };
 struct hashTableIterator{
     struct hashTable* hash_table;
@@ -44,8 +44,7 @@ int hashTableInsert(struct hashTable* hash_table, const char* key, int value); /
 int hashTableGet   (struct hashTable* hash_table, const char* key);            // Получает значение по ключу
 int hashTableRemove(struct hashTable* hash_table, const char* key);            // Удаляет элемент из таблицы
 
-int hashTableLinearProbe   (struct hashTable* hash_table, enum PROBE_MODE probe_mode, const char* key, int value);
-int hashTableQuadraticProbe(struct hashTable* hash_table, enum PROBE_MODE probe_mode, const char* key, int value);
+int hashTableProbe   (struct hashTable* hash_table, enum PROBE_MODE probe_mode, const char* key, int value);
 
 int  hashTableIsFull(struct hashTable* hash_table);                      // Проверяет заполнена ли таблица
 int  hashTableResize(struct hashTable* hash_table, size_t new_capacity); // Увеличивает размер таблицы, если та заполнена

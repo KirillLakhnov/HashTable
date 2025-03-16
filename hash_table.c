@@ -7,18 +7,7 @@ int hashTableCtor(struct hashTable* hash_table, int (*hash_function)(const char*
 
     hash_table->size = 0;
     hash_table->capacity = capacity;
-
-    switch(probe)
-    {
-        case(LINEAR_PROBE):
-            hash_table->probe_function = hashTableLinearProbe;
-            break;
-        case(QUADRATIC_PROBE):
-            hash_table->probe_function = hashTableQuadraticProbe;
-            break;
-        default:
-            return -1;
-    }
+    hash_table->probe = probe;
 
     hash_table->keys = (char**)calloc(hash_table->capacity, sizeof(char*));
     if(!hash_table->keys)
@@ -73,7 +62,7 @@ int hashTableInsert(struct hashTable* hash_table, const char* key, int value)
         }
     }
 
-    int index = hash_table->probe_function(hash_table, INSERT_MODE, key, value);
+    int index = hashTableProbe(hash_table, INSERT_MODE, key, value);
 
     hash_table->keys[index] = strdup(key);
     if (!hash_table->keys[index])
@@ -92,7 +81,7 @@ int hashTableGet(struct hashTable* hash_table, const char* key)
     assert(hash_table);
     assert(key);
 
-    return hash_table->probe_function(hash_table, GET_MODE, key, 0);
+    return hashTableProbe(hash_table, GET_MODE, key, 0);
 }        
   
 int hashTableRemove(struct hashTable* hash_table, const char* key)
@@ -100,13 +89,14 @@ int hashTableRemove(struct hashTable* hash_table, const char* key)
     assert(hash_table);
     assert(key);
 
-    return hash_table->probe_function(hash_table, REMOVE_MODE, key, 0);
+    return hashTableProbe(hash_table, REMOVE_MODE, key, 0);
 }
 
 //============================================================================
-int hashTableLinearProbe(struct hashTable* hash_table, enum PROBE_MODE probe_mode, const char* key, int value)
+int hashTableProbe(struct hashTable* hash_table, enum PROBE_MODE probe_mode, const char* key, int value)
 {
     int index = hash_table->hash_function(key, hash_table->capacity) % hash_table->capacity;
+    int offset = 0;
 
     while(hash_table->keys[index] != NULL)
     {
@@ -152,18 +142,19 @@ int hashTableLinearProbe(struct hashTable* hash_table, enum PROBE_MODE probe_mod
             
         }
 
-        index = (index + 1) % hash_table->capacity;
+        offset++;
+        switch(hash_table->probe)
+        {
+            case(LINEAR_PROBE):
+                index = (index + offset) % hash_table->capacity;
+                break;
+            case(QUADRATIC_PROBE):
+                index = (index + offset*offset) % hash_table->capacity;
+                break;
+        }
     }
 
-    if (probe_mode != INSERT_MODE)
-    {
-        index = -1;
-    }
-    return index;
-}
-int hashTableQuadraticProbe(struct hashTable* hash_table, enum PROBE_MODE probe_mode, const char* key, int value)
-{
-
+    return (probe_mode == INSERT_MODE) ? index : -1;
 }
 //============================================================================
 int hashTableIsFull(struct hashTable* hash_table)
