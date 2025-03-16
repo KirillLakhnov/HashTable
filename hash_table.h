@@ -8,6 +8,17 @@
 
 #define DELETED_ELEMENT (char*)-1
 
+enum PROBE {
+    LINEAR_PROBE    = 0,
+    QUADRATIC_PROBE = 1,
+};
+
+enum PROBE_MODE {
+    INSERT_MODE = 0,
+    GET_MODE    = 1,
+    REMOVE_MODE = 2,
+};
+
 struct hashTable 
 {
     char** keys;
@@ -17,6 +28,8 @@ struct hashTable
     size_t capacity;
 
     int (*hash_function)(const char*, int);
+
+    int (*probe_function)(struct hashTable*, enum PROBE_MODE, const char*, int);
 };
 struct hashTableIterator{
     struct hashTable* hash_table;
@@ -24,12 +37,15 @@ struct hashTableIterator{
 };
 
 //============================================================================
-int hashTableCtor(struct hashTable* hash_table, int (*hash_function)(const char*, int), size_t capacity);
+int hashTableCtor(struct hashTable* hash_table, int (*hash_function)(const char*, int), size_t capacity, enum PROBE probe);
 void hashTableDtor (struct hashTable* hash_table);
 
 int hashTableInsert(struct hashTable* hash_table, const char* key, int value); // Вставляет элемент в таблицу
 int hashTableGet   (struct hashTable* hash_table, const char* key);            // Получает значение по ключу
 int hashTableRemove(struct hashTable* hash_table, const char* key);            // Удаляет элемент из таблицы
+
+int hashTableLinearProbe   (struct hashTable* hash_table, enum PROBE_MODE probe_mode, const char* key, int value);
+int hashTableQuadraticProbe(struct hashTable* hash_table, enum PROBE_MODE probe_mode, const char* key, int value);
 
 int  hashTableIsFull(struct hashTable* hash_table);                      // Проверяет заполнена ли таблица
 int  hashTableResize(struct hashTable* hash_table, size_t new_capacity); // Увеличивает размер таблицы, если та заполнена

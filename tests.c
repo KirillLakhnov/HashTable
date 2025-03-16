@@ -8,7 +8,7 @@
 void TestInsertAndGet() 
 {
     struct hashTable table = {};
-    hashTableCtor(&table, MurmurHashFunction, 10);
+    hashTableCtor(&table, MurmurHashFunction, 10, LINEAR_PROBE);
 
     hashTableInsert(&table, "apple", 50);
     hashTableInsert(&table, "banana", 200);
@@ -29,13 +29,13 @@ void TestInsertAndGet()
 void TestRemove() 
 {
     struct hashTable table = {};
-    hashTableCtor(&table, MurmurHashFunction, 10);
+    hashTableCtor(&table, MurmurHashFunction, 10, LINEAR_PROBE);
 
     hashTableInsert(&table, "apple", 100);
-    //hashTableDumpToFile(&table, "log_file.log");
+    hashTableDumpToFile(&table, "log_file.log");
 
     hashTableRemove(&table, "apple");
-    //hashTableDumpToFile(&table, "log_file.log");
+    hashTableDumpToFile(&table, "log_file.log");
 
     assert(hashTableGet(&table, "apple") == -1); // Должно быть удалено
 
@@ -47,20 +47,21 @@ void TestRemove()
 void TestCollisions() 
 {
     struct hashTable table = {};
-    hashTableCtor(&table, MurmurHashFunction, 5); // Маленький размер для создания коллизий
+    hashTableCtor(&table, MurmurHashFunction, 5, LINEAR_PROBE); // Маленький размер для создания коллизий
 
     hashTableInsert(&table, "one", 1);
     hashTableInsert(&table, "two", 2);
     hashTableInsert(&table, "three", 3);
     hashTableInsert(&table, "four", 4);
     hashTableInsert(&table, "five", 5);
-    //hashTableDumpToFile(&table, "log_file.log");
+    hashTableDumpToFile(&table, "log_file.log");
 
     assert(hashTableGet(&table, "one") == 1);
     assert(hashTableGet(&table, "two") == 2);
     assert(hashTableGet(&table, "three") == 3);
     assert(hashTableGet(&table, "four") == 4);
     assert(hashTableGet(&table, "five") == 5);
+    assert(hashTableGet(&table, "six") == -1);
 
     printf("✅ testCollisions PASSED\n");
 
@@ -70,7 +71,7 @@ void TestCollisions()
 void TestResize() 
 {
     struct hashTable table = {};
-    hashTableCtor(&table, MurmurHashFunction, 2); // Начнём с маленькой таблицы
+    hashTableCtor(&table, MurmurHashFunction, 2, LINEAR_PROBE); // Начнём с маленькой таблицы
 
     hashTableInsert(&table, "a", 1);
     hashTableInsert(&table, "b", 2);

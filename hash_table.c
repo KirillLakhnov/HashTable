@@ -1,12 +1,24 @@
 #include "hash_table.h"
 
-int hashTableCtor(struct hashTable* hash_table, int (*hash_function)(const char*, int), size_t capacity)
+int hashTableCtor(struct hashTable* hash_table, int (*hash_function)(const char*, int), size_t capacity, enum PROBE probe)
 {
     assert(hash_table);
     assert(hash_function);
 
     hash_table->size = 0;
     hash_table->capacity = capacity;
+
+    switch(probe)
+    {
+        case(LINEAR_PROBE):
+            hash_table->probe_function = hashTableLinearProbe;
+            break;
+        case(QUADRATIC_PROBE):
+            hash_table->probe_function = hashTableQuadraticProbe;
+            break;
+        default:
+            return -1;
+    }
 
     hash_table->keys = (char**)calloc(hash_table->capacity, sizeof(char*));
     if(!hash_table->keys)
@@ -61,19 +73,7 @@ int hashTableInsert(struct hashTable* hash_table, const char* key, int value)
         }
     }
 
-    int index = hash_table->hash_function(key, hash_table->capacity) % hash_table->capacity;
-
-    while(hash_table->keys[index] != NULL && 
-          hash_table->keys[index] != DELETED_ELEMENT)
-    {
-        if (strcmp(hash_table->keys[index], key) == 0) 
-        {
-            hash_table->values[index] = value;
-            return 0;
-        }
-
-        index = (index + 1) % hash_table->capacity;
-    }
+    int index = hash_table->probe_function(hash_table, INSERT_MODE, key, value);
 
     hash_table->keys[index] = strdup(key);
     if (!hash_table->keys[index])
@@ -92,20 +92,7 @@ int hashTableGet(struct hashTable* hash_table, const char* key)
     assert(hash_table);
     assert(key);
 
-    int index = hash_table->hash_function(key, hash_table->capacity) % hash_table->capacity;
-
-    while (hash_table->keys[index] != NULL) 
-    {
-        if (hash_table->keys[index] != DELETED_ELEMENT &&
-            strcmp(hash_table->keys[index], key) == 0) 
-        {
-            return hash_table->values[index];
-        }
-
-        index = (index + 1) % hash_table->capacity;
-    }
-
-    return -1;
+    return hash_table->probe_function(hash_table, GET_MODE, key, 0);
 }        
   
 int hashTableRemove(struct hashTable* hash_table, const char* key)
@@ -113,37 +100,82 @@ int hashTableRemove(struct hashTable* hash_table, const char* key)
     assert(hash_table);
     assert(key);
 
+    return hash_table->probe_function(hash_table, REMOVE_MODE, key, 0);
+}
+
+//============================================================================
+int hashTableLinearProbe(struct hashTable* hash_table, enum PROBE_MODE probe_mode, const char* key, int value)
+{
     int index = hash_table->hash_function(key, hash_table->capacity) % hash_table->capacity;
 
-    while (hash_table->keys[index] != NULL) 
+    while(hash_table->keys[index] != NULL)
     {
-        if (hash_table->keys[index] != DELETED_ELEMENT && 
-            strcmp(hash_table->keys[index], key) == 0) 
+        if (probe_mode == INSERT_MODE)
         {
-            free(hash_table->keys[index]);
-            
-            hash_table->keys[index] = DELETED_ELEMENT;
-            hash_table->size--;
-
-            if(hash_table->size <= ((hash_table->capacity/2) - 1))
+            if(hash_table->keys[index] == DELETED_ELEMENT)
             {
-                hashTableResize(hash_table, hash_table->capacity/2);
+                return index;
             }
-
-            return 0;
         }
+        
+        if (strcmp(hash_table->keys[index], key) == 0) 
+        {
+            if (probe_mode == INSERT_MODE)
+            {
+                hash_table->values[index] = value;
+                return 0;
+            }
+            else
+            {
+                if (hash_table->keys[index] != DELETED_ELEMENT)
+                {
+                    if (probe_mode == GET_MODE)
+                    {
+                        return hash_table->values[index];
+                    }
+                    else if (probe_mode == REMOVE_MODE)
+                    {
+                        free(hash_table->keys[index]);
+            
+                        hash_table->keys[index] = DELETED_ELEMENT;
+                        hash_table->size--;
+
+                        if(hash_table->size <= ((hash_table->capacity/2) - 1))
+                        {
+                            hashTableResize(hash_table, hash_table->capacity/2);
+                        }
+
+                        return 0;
+                    }
+                }
+            }
+            
+        }
+
         index = (index + 1) % hash_table->capacity;
     }
 
-    return -1;
+    if (probe_mode != INSERT_MODE)
+    {
+        index = -1;
+    }
+    return index;
+}
+int hashTableQuadraticProbe(struct hashTable* hash_table, enum PROBE_MODE probe_mode, const char* key, int value)
+{
+
 }
 //============================================================================
 int hashTableIsFull(struct hashTable* hash_table)
 {
     assert(hash_table);
 
-    if(hash_table->size >= hash_table->capacity)
+    if(hash_table->size >= hash_table->capacity - 1) 
     {
+        /* "-1" используется для того, чтобы не ломать алгоритмы пробирования, 
+           которые выполняют циклы до того момента, пока не найдут пустой элемент. 
+           То есть в таблице всегда должна быть свободная ячейка. */
+        
         return 1;
     }
 
