@@ -11,6 +11,10 @@ int hashTableCtor(struct hashTable* hash_table, int (*hash_function)(const char*
     {
         hash_table->capacity = FindNearestPrime(capacity, NEAREST_BIGGER);
     }
+    else
+    {
+        hash_table->capacity = capacity;
+    }
 
     hash_table->keys = (char**)calloc(hash_table->capacity, sizeof(char*));
     if(!hash_table->keys)
@@ -614,10 +618,10 @@ const char* hashTableIteratorGetByIndex(struct hashTableIterator* hash_table_ite
             return hash_table_iterator->hash_table->keys[index];
         }
 
+        hash_table_iterator->index = index;
         index = hashTableIteratorHasNext(hash_table_iterator);
         count++;
     }
-
     return NULL;
 }
 //============================================================================

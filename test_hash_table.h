@@ -1,3 +1,6 @@
+#ifndef TEST_HASH_TABLE
+#define TEST_HASH_TABLE
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -8,7 +11,7 @@
 void TestInsertAndGet() 
 {
     struct hashTable table = {};
-    hashTableCtor(&table, MurmurHashFunction, 10, HASH_PROBE);
+    hashTableCtor(&table, MurmurHashFunction, 10, LINEAR_PROBE);
 
     hashTableInsert(&table, "apple", 50);
     hashTableInsert(&table, "banana", 200);
@@ -21,15 +24,14 @@ void TestInsertAndGet()
     assert(hashTableGet(&table, "cherry") == 300);
     assert(hashTableGet(&table, "grape") == -1);
 
-    printf("✅ testInsertAndGet PASSED\n");
+    printf("✅ TestInsertAndGet PASSED\n");
 
     hashTableDtor(&table);
 }
-
 void TestRemove() 
 {
     struct hashTable table = {};
-    hashTableCtor(&table, MurmurHashFunction, 10, HASH_PROBE);
+    hashTableCtor(&table, MurmurHashFunction, 10, QUADRATIC_PROBE);
 
     hashTableInsert(&table, "apple", 100);
     hashTableDumpToFile(&table, "log_file.log");
@@ -39,11 +41,10 @@ void TestRemove()
 
     assert(hashTableGet(&table, "apple") == -1);
 
-    printf("✅ testRemove PASSED\n");
+    printf("✅ TestRemove PASSED\n");
 
     hashTableDtor(&table);
 }
-
 void TestCollisions() 
 {
     struct hashTable table = {};
@@ -63,11 +64,10 @@ void TestCollisions()
     assert(hashTableGet(&table, "five") == 5);
     assert(hashTableGet(&table, "six") == -1);
 
-    printf("✅ testCollisions PASSED\n");
+    printf("✅ TestCollisions PASSED\n");
 
     hashTableDtor(&table);
 }
-
 void TestResize() 
 {
     struct hashTable table = {};
@@ -99,12 +99,12 @@ void TestResize()
 
     assert(hashTableGet(&table, "e") == 5);
 
-    printf("✅ testResize PASSED\n");
+    printf("✅ TestResize PASSED\n");
 
     hashTableDtor(&table);
 }
 
-int main() 
+void AllTestsHashTable()
 {
     TestInsertAndGet();
     TestRemove();
@@ -112,6 +112,6 @@ int main()
     TestResize();
 
     printf("\n🎉 Все тесты успешно пройдены!\n");
-
-    return 0;
 }
+
+#endif //TEST_HASH_TABLE
