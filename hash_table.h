@@ -24,7 +24,7 @@ struct hashTableIterator{
 };
 
 //============================================================================
-int  hashTableCtor (struct hashTable* hash_table, int (*hashFunction)(const char*, int));
+int hashTableCtor(struct hashTable* hash_table, int (*hash_function)(const char*, int), size_t capacity);
 void hashTableDtor (struct hashTable* hash_table);
 
 int hashTableInsert(struct hashTable* hash_table, const char* key, int value); // Вставляет элемент в таблицу

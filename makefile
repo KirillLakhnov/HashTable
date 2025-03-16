@@ -1,7 +1,7 @@
 CC = gcc
 CFLAGS = -Wall -Wextra -std=c11 -g -fsanitize=address
 
-SRC = hash_table.c main.c
+SRC = hash_table.c tests.c
 OBJ = $(SRC:.c=.o)
 EXEC = HashTable
 

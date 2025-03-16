@@ -1,12 +1,12 @@
 #include "hash_table.h"
 
-int hashTableCtor(struct hashTable* hash_table, int (*hash_function)(const char*, int))
+int hashTableCtor(struct hashTable* hash_table, int (*hash_function)(const char*, int), size_t capacity)
 {
     assert(hash_table);
     assert(hash_function);
 
     hash_table->size = 0;
-    hash_table->capacity = 100;
+    hash_table->capacity = capacity;
 
     hash_table->keys = (char**)calloc(hash_table->capacity, sizeof(char*));
     if(!hash_table->keys)
@@ -33,7 +33,14 @@ void hashTableDtor(struct hashTable* hash_table)
 
     for(size_t i = 0; i < hash_table->capacity; i++)
     {
-        free(hash_table->keys[i]);
+        if(hash_table->keys[i] != DELETED_ELEMENT)
+        {
+            free(hash_table->keys[i]);
+        }
+        else
+        {
+            hash_table->keys[i] = NULL;
+        }
     }
 
     free(hash_table->keys);
@@ -117,6 +124,11 @@ int hashTableRemove(struct hashTable* hash_table, const char* key)
             
             hash_table->keys[index] = DELETED_ELEMENT;
             hash_table->size--;
+
+            if(hash_table->size <= ((hash_table->capacity/2) - 1))
+            {
+                hashTableResize(hash_table, hash_table->capacity/2);
+            }
 
             return 0;
         }
@@ -224,11 +236,11 @@ void hashTableDump (struct hashTable* hash_table)
     {
         if (hash_table->keys[i] == NULL) 
         {
-            printf("| %-5zu | %-20s | %-10s | %-10s | %-8s |\n", i, "(пусто)", "-", "-", "-");
+            printf("| %-5zu | %-25s | %-10s | %-10s | %-8s |\n", i, "(пусто)", "-", "-", "-");
         } 
         else if (hash_table->keys[i] == DELETED_ELEMENT) 
         {
-            printf("| %-5zu | %-20s | %-10s | %-10s | %-8s |\n", i, "(удалено)", "-", "-", "-");
+            printf("| %-5zu | %-27s | %-10s | %-10s | %-8s |\n", i, "(удалено)", "-", "-", "-");
         } 
         else 
         {
@@ -288,7 +300,7 @@ void hashTableDumpToFile(struct hashTable* hash_table, const char* filename)
     assert(hash_table);
     assert(filename);
 
-    FILE* file = fopen(filename, "w");
+    FILE* file = fopen(filename, "a");
     if (!file) 
     {
         perror("Ошибка открытия файла");
@@ -316,11 +328,11 @@ void hashTableDumpToFile(struct hashTable* hash_table, const char* filename)
     {
         if (hash_table->keys[i] == NULL) 
         {
-            fprintf(file, "| %-5zu | %-20s | %-10s | %-10s | %-8s |\n", i, "(пусто)", "-", "-", "-");
+            fprintf(file, "| %-5zu | %-25s | %-10s | %-10s | %-8s |\n", i, "(пусто)", "-", "-", "-");
         } 
         else if (hash_table->keys[i] == DELETED_ELEMENT) 
         {
-            fprintf(file, "| %-5zu | %-20s | %-10s | %-10s | %-8s |\n", i, "(удалено)", "-", "-", "-");
+            fprintf(file, "| %-5zu | %-27s | %-10s | %-10s | %-8s |\n", i, "(удалено)", "-", "-", "-");
         } 
         else 
         {
@@ -373,7 +385,7 @@ void hashTableDumpToFile(struct hashTable* hash_table, const char* filename)
     }
 
     fprintf(file, "==================================================================================\n\n");
-    if (!fclose(file)) 
+    if (fclose(file)) 
     {
         perror("Ошибка при закрытии файла");
     }
