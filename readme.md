@@ -33,7 +33,12 @@
     * Используем вторую хеш-функцию для расчета шага.
     * Плюсы: Нет кластеризации, хороший равномерный поиск.
     * Минусы: Медленнее, чем линейное пробирование.
+```c
+    int hash1 = hash_table->hash_function(key, hash_table->capacity);
+    int hash2 = 1 + (hash1 % (hash_table->capacity - 1));
 
+    index = (hash1 + offset*hash2) % hash_table->capacity;
+```
 ### Хеш-функция Murmur
 
 Как работает алгоритм хеширование Murmur:
