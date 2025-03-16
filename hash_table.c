@@ -141,8 +141,7 @@ int hashTableProbe(struct hashTable* hash_table, enum PROBE_MODE probe_mode, con
                         return 0;
                     }
                 }
-            }
-            
+            }   
         }
 
         offset++;
@@ -155,7 +154,7 @@ int hashTableProbe(struct hashTable* hash_table, enum PROBE_MODE probe_mode, con
                 index = (index + offset*offset) % hash_table->capacity;
                 break;
             case(HASH_PROBE):
-                index = (index + offset*hash2) % hash_table->capacity;
+                index = (hash1 + offset*hash2) % hash_table->capacity;
                 break;
         }
     }
@@ -240,18 +239,17 @@ void hashTableClear(struct hashTable* hash_table)
 }
 
 //============================================================================
-void hashTableDump (struct hashTable* hash_table)
+void hashTableDump(struct hashTable* hash_table)
 {
     assert(hash_table);
 
     double load_factor = (double)(hash_table->size / hash_table->capacity);
-
     int total_collisions  = 0;
     int total_probes      = 0;
     int inserted_elements = 0;
     int max_probe_length  = 0;
 
-    int collision_counts[hash_table->capacity]; 
+    int collision_counts[hash_table->capacity];
     memset(collision_counts, 0, sizeof(collision_counts));
 
     printf("\n==================================================================================\n");
@@ -261,29 +259,42 @@ void hashTableDump (struct hashTable* hash_table)
     printf("| %-5s | %-20s | %-10s | %-10s | %-8s |\n", "Index", "Key", "Value", "Hash", "Probes");
     printf("----------------------------------------------------------------------------------\n");
 
-    for (size_t i = 0; i < hash_table->capacity; i++) 
+    for (size_t i = 0; i < hash_table->capacity; i++)
     {
-        if (hash_table->keys[i] == NULL) 
+        if (hash_table->keys[i] == NULL)
         {
             printf("| %-5zu | %-25s | %-10s | %-10s | %-8s |\n", i, "(пусто)", "-", "-", "-");
-        } 
-        else if (hash_table->keys[i] == DELETED_ELEMENT) 
+        }
+        else if (hash_table->keys[i] == DELETED_ELEMENT)
         {
             printf("| %-5zu | %-27s | %-10s | %-10s | %-8s |\n", i, "(удалено)", "-", "-", "-");
-        } 
-        else 
+        }
+        else
         {
             int hash = hash_table->hash_function(hash_table->keys[i], hash_table->capacity);
             int probes = 0;
             size_t index = hash % hash_table->capacity;
+            int offset = 0;
 
-            while (index != i) 
+            while (index != i)
             {
-                index = (index + 1) % hash_table->capacity;
+                offset++;
+                switch (hash_table->probe)
+                {
+                    case LINEAR_PROBE:
+                        index = (hash + offset) % hash_table->capacity;
+                        break;
+                    case QUADRATIC_PROBE:
+                        index = (hash + offset * offset) % hash_table->capacity;
+                        break;
+                    case HASH_PROBE:
+                        index = (hash + offset * (1 + (hash % (hash_table->capacity - 1)))) % hash_table->capacity;
+                        break;
+                }
                 probes++;
             }
 
-            if (probes > 0) 
+            if (probes > 0)
             {
                 total_collisions++;
                 collision_counts[i] = probes;
@@ -292,7 +303,7 @@ void hashTableDump (struct hashTable* hash_table)
             total_probes += probes;
             inserted_elements++;
 
-            if (probes > max_probe_length) 
+            if (probes > max_probe_length)
             {
                 max_probe_length = probes;
             }
@@ -313,9 +324,9 @@ void hashTableDump (struct hashTable* hash_table)
     printf("📌 Максимальная длина пробирования: %d\n", max_probe_length);
 
     printf("\n🔍 Индексы с наибольшими коллизиями:\n");
-    for (size_t i = 0; i < hash_table->capacity; i++) 
+    for (size_t i = 0; i < hash_table->capacity; i++)
     {
-        if (collision_counts[i] > 0) 
+        if (collision_counts[i] > 0)
         {
             printf("  - [%2zu] Коллизии: %d\n", i, collision_counts[i]);
         }
@@ -324,26 +335,25 @@ void hashTableDump (struct hashTable* hash_table)
     printf("==================================================================================\n\n");
 }
 
-void hashTableDumpToFile(struct hashTable* hash_table, const char* filename) 
+void hashTableDumpToFile(struct hashTable* hash_table, const char* filename)
 {
     assert(hash_table);
     assert(filename);
 
     FILE* file = fopen(filename, "a");
-    if (!file) 
+    if (!file)
     {
         perror("Ошибка открытия файла");
         return;
     }
 
     double load_factor = (double)(hash_table->size / hash_table->capacity);
-
     int total_collisions  = 0;
     int total_probes      = 0;
     int inserted_elements = 0;
     int max_probe_length  = 0;
 
-    int collision_counts[hash_table->capacity]; 
+    int collision_counts[hash_table->capacity];
     memset(collision_counts, 0, sizeof(collision_counts));
 
     fprintf(file, "\n==================================================================================\n");
@@ -353,29 +363,42 @@ void hashTableDumpToFile(struct hashTable* hash_table, const char* filename)
     fprintf(file, "| %-5s | %-20s | %-10s | %-10s | %-8s |\n", "Index", "Key", "Value", "Hash", "Probes");
     fprintf(file, "----------------------------------------------------------------------------------\n");
 
-    for (size_t i = 0; i < hash_table->capacity; i++) 
+    for (size_t i = 0; i < hash_table->capacity; i++)
     {
-        if (hash_table->keys[i] == NULL) 
+        if (hash_table->keys[i] == NULL)
         {
             fprintf(file, "| %-5zu | %-25s | %-10s | %-10s | %-8s |\n", i, "(пусто)", "-", "-", "-");
-        } 
-        else if (hash_table->keys[i] == DELETED_ELEMENT) 
+        }
+        else if (hash_table->keys[i] == DELETED_ELEMENT)
         {
             fprintf(file, "| %-5zu | %-27s | %-10s | %-10s | %-8s |\n", i, "(удалено)", "-", "-", "-");
-        } 
-        else 
+        }
+        else
         {
             int hash = hash_table->hash_function(hash_table->keys[i], hash_table->capacity);
             int probes = 0;
             size_t index = hash % hash_table->capacity;
+            int offset = 0;
 
-            while (index != i) 
+            while (index != i)
             {
-                index = (index + 1) % hash_table->capacity;
+                offset++;
+                switch (hash_table->probe)
+                {
+                    case LINEAR_PROBE:
+                        index = (hash + offset) % hash_table->capacity;
+                        break;
+                    case QUADRATIC_PROBE:
+                        index = (hash + offset * offset) % hash_table->capacity;
+                        break;
+                    case HASH_PROBE:
+                        index = (hash + offset * (1 + (hash % (hash_table->capacity - 1)))) % hash_table->capacity;
+                        break;
+                }
                 probes++;
             }
 
-            if (probes > 0) 
+            if (probes > 0)
             {
                 total_collisions++;
                 collision_counts[i] = probes;
@@ -384,7 +407,7 @@ void hashTableDumpToFile(struct hashTable* hash_table, const char* filename)
             total_probes += probes;
             inserted_elements++;
 
-            if (probes > max_probe_length) 
+            if (probes > max_probe_length)
             {
                 max_probe_length = probes;
             }
@@ -405,9 +428,9 @@ void hashTableDumpToFile(struct hashTable* hash_table, const char* filename)
     fprintf(file, "📌 Максимальная длина пробирования: %d\n", max_probe_length);
 
     fprintf(file, "\n🔍 Индексы с наибольшими коллизиями:\n");
-    for (size_t i = 0; i < hash_table->capacity; i++) 
+    for (size_t i = 0; i < hash_table->capacity; i++)
     {
-        if (collision_counts[i] > 0) 
+        if (collision_counts[i] > 0)
         {
             fprintf(file, "  - [%2zu] Коллизии: %d\n", i, collision_counts[i]);
         }
