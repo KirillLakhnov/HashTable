@@ -63,7 +63,7 @@ static size_t FindNearestPrime(size_t n, enum MODE_PRIME mode)
     }
 }
 //============================================================================
-int hashTableCtor(struct hashTable* hash_table, int (*hash_function)(const char*, int), size_t capacity, enum PROBE probe)
+int hashTableCtor(hashTable* hash_table, int (*hash_function)(const char*, int), size_t capacity, enum PROBE probe)
 {
     assert(hash_table);
     assert(hash_function);
@@ -98,7 +98,7 @@ int hashTableCtor(struct hashTable* hash_table, int (*hash_function)(const char*
     return 0;
 }
 
-void hashTableDtor(struct hashTable* hash_table)
+void hashTableDtor(hashTable* hash_table)
 {
     assert(hash_table);
 
@@ -118,7 +118,7 @@ void hashTableDtor(struct hashTable* hash_table)
     free(hash_table->values);
 }
 //============================================================================
-static int hashTableProbe(struct hashTable* hash_table, enum PROBE_MODE probe_mode, const char* key, int value)
+static int hashTableProbe(hashTable* hash_table, enum PROBE_MODE probe_mode, const char* key, int value)
 {
     int hash1 = hash_table->hash_function(key, hash_table->capacity);
     int hash2 = 1 + (hash1 % (hash_table->capacity - 1));
@@ -196,7 +196,7 @@ static int hashTableProbe(struct hashTable* hash_table, enum PROBE_MODE probe_mo
     return (probe_mode == INSERT_MODE) ? index : -1;
 }
 //============================================================================
-int hashTableInsert(struct hashTable* hash_table, const char* key, int value)
+int hashTableInsert(hashTable* hash_table, const char* key, int value)
 {
     assert(hash_table);
     assert(key);
@@ -234,7 +234,7 @@ int hashTableInsert(struct hashTable* hash_table, const char* key, int value)
     return 0;
 } 
 
-int hashTableGet(struct hashTable* hash_table, const char* key)
+int hashTableGet(hashTable* hash_table, const char* key)
 {
     assert(hash_table);
     assert(key);
@@ -242,7 +242,7 @@ int hashTableGet(struct hashTable* hash_table, const char* key)
     return hashTableProbe(hash_table, GET_MODE, key, 0);
 }        
   
-int hashTableRemove(struct hashTable* hash_table, const char* key)
+int hashTableRemove(hashTable* hash_table, const char* key)
 {
     assert(hash_table);
     assert(key);
@@ -251,7 +251,7 @@ int hashTableRemove(struct hashTable* hash_table, const char* key)
 }
 
 //============================================================================
-int hashTableIsFull(struct hashTable* hash_table)
+int hashTableIsFull(hashTable* hash_table)
 {
     assert(hash_table);
 
@@ -267,7 +267,7 @@ int hashTableIsFull(struct hashTable* hash_table)
     return 0;
 }
 
-int hashTableResize(struct hashTable* hash_table, size_t new_capacity)
+int hashTableResize(hashTable* hash_table, size_t new_capacity)
 {
     assert(hash_table);
 
@@ -309,7 +309,7 @@ int hashTableResize(struct hashTable* hash_table, size_t new_capacity)
     return 0;
 }
 
-void hashTableClear(struct hashTable* hash_table)
+void hashTableClear(hashTable* hash_table)
 {
     assert(hash_table);
 
@@ -328,7 +328,7 @@ void hashTableClear(struct hashTable* hash_table)
 }
 
 //============================================================================
-void hashTableDump(struct hashTable* hash_table)
+void hashTableDump(hashTable* hash_table)
 {
     assert(hash_table);
 
@@ -424,7 +424,7 @@ void hashTableDump(struct hashTable* hash_table)
     printf("==================================================================================\n\n");
 }
 
-void hashTableDumpToFile(struct hashTable* hash_table, const char* filename)
+void hashTableDumpToFile(hashTable* hash_table, const char* filename)
 {
     assert(hash_table);
     assert(filename);
@@ -566,7 +566,7 @@ int WorseHashFunction(const char* key, int hash_table_capacity)
     return (int)key[0] % hash_table_capacity;
 }
 //============================================================================
-void hashTableIteratorInit(struct hashTableIterator* hash_table_iterator, struct hashTable* hash_table)
+void hashTableIteratorInit(hashTableIterator* hash_table_iterator, hashTable* hash_table)
 {
     assert(hash_table_iterator);
     assert(hash_table);
@@ -575,7 +575,7 @@ void hashTableIteratorInit(struct hashTableIterator* hash_table_iterator, struct
     hash_table_iterator->index = 0;
 }
 
-static long long int hashTableIteratorHasNext(struct hashTableIterator* hash_table_iterator)
+static long long int hashTableIteratorHasNext(hashTableIterator* hash_table_iterator)
 {
     assert(hash_table_iterator);
     
@@ -593,7 +593,7 @@ static long long int hashTableIteratorHasNext(struct hashTableIterator* hash_tab
     return -1; 
 }
 
-static long long int hashTableIteratorHasPrev(struct hashTableIterator* hash_table_iterator)
+static long long int hashTableIteratorHasPrev(hashTableIterator* hash_table_iterator)
 {
     assert(hash_table_iterator);
 
@@ -625,7 +625,7 @@ static long long int hashTableIteratorHasPrev(struct hashTableIterator* hash_tab
     return -1;
 }
 
-const char* hashTableIteratorNext(struct hashTableIterator* hash_table_iterator, int* value)
+const char* hashTableIteratorNext(hashTableIterator* hash_table_iterator, int* value)
 {
     assert(hash_table_iterator);
     assert(value);
@@ -642,7 +642,7 @@ const char* hashTableIteratorNext(struct hashTableIterator* hash_table_iterator,
     return NULL;
 }
 
-const char* hashTableIteratorPrev(struct hashTableIterator* hash_table_iterator, int* value)
+const char* hashTableIteratorPrev(hashTableIterator* hash_table_iterator, int* value)
 {
     assert(hash_table_iterator);
     assert(value);
@@ -659,7 +659,7 @@ const char* hashTableIteratorPrev(struct hashTableIterator* hash_table_iterator,
     return NULL;
 }
 
-const char* hashTableIteratorGetByIndex(struct hashTableIterator* hash_table_iterator, size_t target_index, int* value)
+const char* hashTableIteratorGetByIndex(hashTableIterator* hash_table_iterator, size_t target_index, int* value)
 {
     assert(hash_table_iterator);
     assert(value);

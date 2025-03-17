@@ -14,7 +14,7 @@ enum PROBE {
     HASH_PROBE = 2,
 };
 
-struct hashTable 
+typedef struct hashTable 
 {
     char** keys;
     int* values;
@@ -25,36 +25,37 @@ struct hashTable
     int (*hash_function)(const char*, int);
 
     enum PROBE probe;
-};
-struct hashTableIterator{
+} hashTable;
+
+typedef struct hashTableIterator{
     struct hashTable* hash_table;
     size_t index;
-};
+} hashTableIterator;
 
 //============================================================================
-int  hashTableCtor (struct hashTable* hash_table, int (*hash_function)(const char*, int), size_t capacity, enum PROBE probe);
-void hashTableDtor (struct hashTable* hash_table);
+int  hashTableCtor (hashTable* hash_table, int (*hash_function)(const char*, int), size_t capacity, enum PROBE probe);
+void hashTableDtor (hashTable* hash_table);
 
-int hashTableInsert(struct hashTable* hash_table, const char* key, int value); 
-int hashTableGet   (struct hashTable* hash_table, const char* key);           
-int hashTableRemove(struct hashTable* hash_table, const char* key);            
+int hashTableInsert(hashTable* hash_table, const char* key, int value); 
+int hashTableGet   (hashTable* hash_table, const char* key);           
+int hashTableRemove(hashTable* hash_table, const char* key);            
 
-int  hashTableIsFull(struct hashTable* hash_table);                     
-int  hashTableResize(struct hashTable* hash_table, size_t new_capacity); 
-void hashTableClear (struct hashTable* hash_table);                      
+int  hashTableIsFull(hashTable* hash_table);                     
+int  hashTableResize(hashTable* hash_table, size_t new_capacity); 
+void hashTableClear (hashTable* hash_table);                      
 
-void hashTableDump      (struct hashTable* hash_table);
-void hashTableDumpToFile(struct hashTable* hash_table, const char* filename);
+void hashTableDump      (hashTable* hash_table);
+void hashTableDumpToFile(hashTable* hash_table, const char* filename);
 //============================================================================
 int MurmurHashFunction(const char* key, int hash_table_capacity);
 int WorseHashFunction(const char* key, int hash_table_capacity);
 //============================================================================
-void hashTableIteratorInit(struct hashTableIterator* hash_table_iterator, struct hashTable* hash_table);
+void hashTableIteratorInit(hashTableIterator* hash_table_iterator, hashTable* hash_table);
 
-const char* hashTableIteratorNext(struct hashTableIterator* hash_table_iterator, int* value);
-const char* hashTableIteratorPrev(struct hashTableIterator* hash_table_iterator, int* value);
+const char* hashTableIteratorNext(hashTableIterator* hash_table_iterator, int* value);
+const char* hashTableIteratorPrev(hashTableIterator* hash_table_iterator, int* value);
 
-const char* hashTableIteratorGetByIndex(struct hashTableIterator* hash_table_iterator, size_t target_index, int* value);
+const char* hashTableIteratorGetByIndex(hashTableIterator* hash_table_iterator, size_t target_index, int* value);
 //============================================================================
 
 #endif //HASH_TABLE
