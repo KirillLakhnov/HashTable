@@ -129,7 +129,8 @@ int hashTableProbe(struct hashTable* hash_table, enum PROBE_MODE probe_mode, con
             }
         }
         
-        if (strcmp(hash_table->keys[index], key) == 0) 
+        if (hash_table->keys[index] != DELETED_ELEMENT &&
+            strcmp(hash_table->keys[index], key) == 0) 
         {
             if (probe_mode == INSERT_MODE)
             {
@@ -138,37 +139,34 @@ int hashTableProbe(struct hashTable* hash_table, enum PROBE_MODE probe_mode, con
             }
             else
             {
-                if (hash_table->keys[index] != DELETED_ELEMENT)
+                if (probe_mode == GET_MODE)
                 {
-                    if (probe_mode == GET_MODE)
-                    {
-                        return hash_table->values[index];
-                    }
-                    else if (probe_mode == REMOVE_MODE)
-                    {
-                        free(hash_table->keys[index]);
-            
-                        hash_table->keys[index] = DELETED_ELEMENT;
-                        hash_table->size--;
+                    return hash_table->values[index];
+                }
+                else if (probe_mode == REMOVE_MODE)
+                {
+                    free(hash_table->keys[index]);
+        
+                    hash_table->keys[index] = DELETED_ELEMENT;
+                    hash_table->size--;
 
-                        if(hash_table->size <= ((hash_table->capacity/2) - 1))
+                    if(hash_table->size <= ((hash_table->capacity/2) - 1))
+                    {
+                        size_t new_capacity = 0;
+
+                        if (hash_table->probe == HASH_PROBE)
                         {
-                            size_t new_capacity = 0;
-
-                            if (hash_table->probe == HASH_PROBE)
-                            {
-                                new_capacity = FindNearestPrime(hash_table->capacity/2, NEAREST_BIGGER);
-                            }
-                            else
-                            {
-                                new_capacity = hash_table->capacity/2;
-                            }
-
-                            hashTableResize(hash_table, new_capacity);
+                            new_capacity = FindNearestPrime(hash_table->capacity/2, NEAREST_BIGGER);
+                        }
+                        else
+                        {
+                            new_capacity = hash_table->capacity/2;
                         }
 
-                        return 0;
+                        assert(hashTableResize(hash_table, new_capacity) == 0);
                     }
+
+                    return 0;
                 }
             }   
         }
@@ -499,6 +497,11 @@ int MurmurHashFunction(const char* key, int hash_table_capacity)
     hash ^= hash >> 15;
 
     return (int)(hash % hash_table_capacity);  // Приводим хеш к диапазону
+}
+
+int WorseHashFunction(const char* key, int hash_table_capacity) 
+{
+    return (int)key[0] % hash_table_capacity;
 }
 //============================================================================
 void hashTableIteratorInit(struct hashTableIterator* hash_table_iterator, struct hashTable* hash_table)

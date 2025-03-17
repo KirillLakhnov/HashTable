@@ -8,7 +8,7 @@
 
 #include "hash_table.h"
 
-void TestInsertAndGet() 
+void TestHashTableInsertAndGet() 
 {
     struct hashTable table = {};
     hashTableCtor(&table, MurmurHashFunction, 10, LINEAR_PROBE);
@@ -28,7 +28,7 @@ void TestInsertAndGet()
 
     hashTableDtor(&table);
 }
-void TestRemove() 
+void TestHashTableRemove() 
 {
     struct hashTable table = {};
     hashTableCtor(&table, MurmurHashFunction, 10, QUADRATIC_PROBE);
@@ -45,7 +45,7 @@ void TestRemove()
 
     hashTableDtor(&table);
 }
-void TestCollisions() 
+void TestHashTableCollisions() 
 {
     struct hashTable table = {};
     hashTableCtor(&table, MurmurHashFunction, 10, HASH_PROBE); // Маленький размер для создания коллизий
@@ -68,7 +68,7 @@ void TestCollisions()
 
     hashTableDtor(&table);
 }
-void TestResize() 
+void TestHashTableResize() 
 {
     struct hashTable table = {};
     hashTableCtor(&table, MurmurHashFunction, 2, HASH_PROBE); 
@@ -96,7 +96,6 @@ void TestResize()
     hashTableRemove(&table, "d"); // Должно вызвать уменьшение таблицы
     hashTableDumpToFile(&table, "log_file.log");
     
-
     assert(hashTableGet(&table, "e") == 5);
 
     printf("✅ TestResize PASSED\n");
@@ -106,10 +105,10 @@ void TestResize()
 
 void AllTestsHashTable()
 {
-    TestInsertAndGet();
-    TestRemove();
-    TestCollisions();
-    TestResize();
+    TestHashTableInsertAndGet();
+    TestHashTableRemove();
+    TestHashTableCollisions();
+    TestHashTableResize();
 
     printf("\n🎉 Все тесты успешно пройдены!\n");
 }

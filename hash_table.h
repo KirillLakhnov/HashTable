@@ -60,6 +60,7 @@ void hashTableDump      (struct hashTable* hash_table);
 void hashTableDumpToFile(struct hashTable* hash_table, const char* filename);
 //============================================================================
 int MurmurHashFunction(const char* key, int hash_table_capacity);
+int WorseHashFunction(const char* key, int hash_table_capacity);
 //============================================================================
 void hashTableIteratorInit(struct hashTableIterator* hash_table_iterator, struct hashTable* hash_table);
 
