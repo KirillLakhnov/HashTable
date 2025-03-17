@@ -31,7 +31,7 @@
 
 ## **Функции**
 ### **Создание и удаление таблицы**
-#### `int hashTableCtor(struct hashTable* hash_table, int (*hash_function)(const char*, int), size_t capacity, enum PROBE probe);`
+#### `int hashTableCtor(hashTable* hash_table, int (*hash_function)(const char*, int), size_t capacity, enum PROBE probe);`
 - **Описание**: Создаёт хеш-таблицу.
 - **Параметры**:
   - `hash_table` — указатель на структуру хеш-таблицы.
@@ -40,13 +40,13 @@
   - `probe` — метод пробирования.
 - **Возвращает**: `0`, если успешно, `-1` при ошибке.
 
-#### `void hashTableDtor(struct hashTable* hash_table);`
+#### `void hashTableDtor(hashTable* hash_table);`
 - **Описание**: Удаляет хеш-таблицу, освобождая память.
 - **Параметры**:
   - `hash_table` — указатель на хеш-таблицу, которую нужно удалить.
 
 ### **Основные операции**
-#### `int hashTableInsert(struct hashTable* hash_table, const char* key, int value);`
+#### `int hashTableInsert(hashTable* hash_table, const char* key, int value);`
 - **Описание**: Вставляет элемент в таблицу.
 - **Параметры**:
   - `hash_table` — указатель на хеш-таблицу.
@@ -54,14 +54,14 @@
   - `value` — значение, связанное с ключом.
 - **Возвращает**: `0` при успехе, `-1` при ошибке.
 
-#### `int hashTableGet(struct hashTable* hash_table, const char* key);`
+#### `int hashTableGet(hashTable* hash_table, const char* key);`
 - **Описание**: Получает значение по ключу.
 - **Параметры**:
   - `hash_table` — указатель на хеш-таблицу.
   - `key` — строковый ключ.
 - **Возвращает**: Значение, либо `-1`, если ключ отсутствует.
 
-#### `int hashTableRemove(struct hashTable* hash_table, const char* key);`
+#### `int hashTableRemove(hashTable* hash_table, const char* key);`
 - **Описание**: Удаляет элемент по ключу.
 - **Параметры**:
   - `hash_table` — указатель на хеш-таблицу.
@@ -69,46 +69,46 @@
 - **Возвращает**: `0` при успехе, `-1`, если ключ не найден.
 
 ### **Ресайзинг и очистка**
-#### `int hashTableIsFull(struct hashTable* hash_table);`
+#### `int hashTableIsFull(hashTable* hash_table);`
 - **Описание**: Проверяет, заполнена ли таблица.
 - **Параметры**:
   - `hash_table` — указатель на хеш-таблицу.
 - **Возвращает**: `1`, если заполнена, `0` иначе.
 
-#### `int hashTableResize(struct hashTable* hash_table, size_t new_capacity);`
+#### `int hashTableResize(hashTable* hash_table, size_t new_capacity);`
 - **Описание**: Изменяет ёмкость таблицы.
 - **Параметры**:
   - `hash_table` — указатель на хеш-таблицу.
   - `new_capacity` — новая ёмкость таблицы.
 - **Возвращает**: `0` при успехе, `-1` при ошибке.
 
-#### `void hashTableClear(struct hashTable* hash_table);`
+#### `void hashTableClear(hashTable* hash_table);`
 - **Описание**: Очищает таблицу, удаляя все элементы.
 - **Параметры**:
   - `hash_table` — указатель на хеш-таблицу.
 
 ### **Итератор хеш-таблицы**
-#### `void hashTableIteratorInit(struct hashTableIterator* hash_table_iterator, struct hashTable* hash_table);`
+#### `void hashTableIteratorInit(hashTableIterator* hash_table_iterator,hashTable* hash_table);`
 - **Описание**: Инициализирует итератор для перебора элементов хеш-таблицы.
 - **Параметры**:
   - `hash_table_iterator` — указатель на итератор.
   - `hash_table` — указатель на хеш-таблицу, по которой будет выполняться итерация.
 
-#### `const char* hashTableIteratorNext(struct hashTableIterator* hash_table_iterator, int* value);`
+#### `const char* hashTableIteratorNext(hashTableIterator* hash_table_iterator, int* value);`
 - **Описание**: Переходит к следующему элементу в хеш-таблице.
 - **Параметры**:
   - `hash_table_iterator` — указатель на итератор.
   - `value` — указатель на переменную, в которую будет записано значение текущего элемента.
 - **Возвращает**: Указатель на ключ следующего элемента или `NULL`, если элементов больше нет.
 
-#### `const char* hashTableIteratorPrev(struct hashTableIterator* hash_table_iterator, int* value);`
+#### `const char* hashTableIteratorPrev(hashTableIterator* hash_table_iterator, int* value);`
 - **Описание**: Переходит к предыдущему элементу в хеш-таблице.
 - **Параметры**:
   - `hash_table_iterator` — указатель на итератор.
   - `value` — указатель на переменную, в которую будет записано значение текущего элемента.
 - **Возвращает**: Указатель на ключ предыдущего элемента или `NULL`, если предыдущих элементов нет.
 
-#### `const char* hashTableIteratorGetByIndex(struct hashTableIterator* hash_table_iterator, size_t target_index, int* value);`
+#### `const char* hashTableIteratorGetByIndex(hashTableIterator* hash_table_iterator, size_t target_index, int* value);`
 - **Описание**: Получает элемент по индексу в хеш-таблице.
 - **Параметры**:
   - `hash_table_iterator` — указатель на итератор.
