@@ -48,7 +48,7 @@ void hashTableDump      (hashTable* hash_table);
 void hashTableDumpToFile(hashTable* hash_table, const char* filename);
 //============================================================================
 int MurmurHashFunction(const char* key, int hash_table_capacity);
-int WorseHashFunction(const char* key, int hash_table_capacity);
+int  WorseHashFunction(const char* key, int hash_table_capacity);
 //============================================================================
 void hashTableIteratorInit(hashTableIterator* hash_table_iterator, hashTable* hash_table);
 
