@@ -1,5 +1,68 @@
 #include "hash_table.h"
 
+enum MODE_PRIME {
+    NEAREST_LESSER = 0,
+    NEAREST_BIGGER = 1,
+};
+
+enum PROBE_MODE {
+    INSERT_MODE = 0,
+    GET_MODE    = 1,
+    REMOVE_MODE = 2,
+};
+//============================================================================
+static int IsPrime(size_t n) 
+{
+    if (n < 2) 
+    {
+        return 0;
+    }
+    if (n == 2 || n == 3) 
+    {
+        return 1;
+    }
+    if (n % 2 == 0 || n % 3 == 0) 
+    {
+        return 0;
+    }
+    for (size_t i = 5; i * i <= n; i += 6) 
+    {
+        if (n % i == 0 || n % (i + 2) == 0) 
+        {
+            return 0;
+        }
+    }
+    
+    return 1;
+}
+
+static size_t FindNearestPrime(size_t n, enum MODE_PRIME mode) 
+{
+    if (n < 2) return 2; 
+
+    size_t lower = n, upper = n;
+
+    while (1) 
+    {
+        if (mode == NEAREST_BIGGER)
+        {
+            if (IsPrime(upper)) 
+            {
+                return upper; 
+            }
+            upper++;
+        }
+        if (mode == NEAREST_LESSER)
+        {
+            if (IsPrime(lower)) 
+            {
+                return lower; 
+            }
+            lower = (lower > 2) ? lower - 1 : 2;
+        }
+    }
+}
+//============================================================================
 int hashTableCtor(struct hashTable* hash_table, int (*hash_function)(const char*, int), size_t capacity, enum PROBE probe)
 {
     assert(hash_table);
@@ -54,64 +117,8 @@ void hashTableDtor(struct hashTable* hash_table)
     free(hash_table->keys);
     free(hash_table->values);
 }
-
 //============================================================================
-int hashTableInsert(struct hashTable* hash_table, const char* key, int value)
-{
-    assert(hash_table);
-    assert(key);
-
-    if (hashTableIsFull(hash_table)) 
-    {
-        size_t new_capacity = 0;
-
-        if (hash_table->probe == HASH_PROBE)
-        {
-            new_capacity = FindNearestPrime(hash_table->capacity * 2, NEAREST_BIGGER);
-        }
-        else
-        {
-            new_capacity = hash_table->capacity * 2;
-        }
-
-        if (hashTableResize(hash_table, new_capacity) == -1)
-        {
-            return -1;
-        }
-    }
-
-    int index = hashTableProbe(hash_table, INSERT_MODE, key, value);
-
-    hash_table->keys[index] = strdup(key);
-    if (!hash_table->keys[index])
-    {
-        return -1;
-    }
-
-    hash_table->values[index] = value;
-    hash_table->size++;
-
-    return 0;
-} 
-
-int hashTableGet(struct hashTable* hash_table, const char* key)
-{
-    assert(hash_table);
-    assert(key);
-
-    return hashTableProbe(hash_table, GET_MODE, key, 0);
-}        
-  
-int hashTableRemove(struct hashTable* hash_table, const char* key)
-{
-    assert(hash_table);
-    assert(key);
-
-    return hashTableProbe(hash_table, REMOVE_MODE, key, 0);
-}
-
-//============================================================================
-int hashTableProbe(struct hashTable* hash_table, enum PROBE_MODE probe_mode, const char* key, int value)
+static int hashTableProbe(struct hashTable* hash_table, enum PROBE_MODE probe_mode, const char* key, int value)
 {
     int hash1 = hash_table->hash_function(key, hash_table->capacity);
     int hash2 = 1 + (hash1 % (hash_table->capacity - 1));
@@ -188,6 +195,61 @@ int hashTableProbe(struct hashTable* hash_table, enum PROBE_MODE probe_mode, con
 
     return (probe_mode == INSERT_MODE) ? index : -1;
 }
+//============================================================================
+int hashTableInsert(struct hashTable* hash_table, const char* key, int value)
+{
+    assert(hash_table);
+    assert(key);
+
+    if (hashTableIsFull(hash_table)) 
+    {
+        size_t new_capacity = 0;
+
+        if (hash_table->probe == HASH_PROBE)
+        {
+            new_capacity = FindNearestPrime(hash_table->capacity * 2, NEAREST_BIGGER);
+        }
+        else
+        {
+            new_capacity = hash_table->capacity * 2;
+        }
+
+        if (hashTableResize(hash_table, new_capacity) == -1)
+        {
+            return -1;
+        }
+    }
+
+    int index = hashTableProbe(hash_table, INSERT_MODE, key, value);
+
+    hash_table->keys[index] = strdup(key);
+    if (!hash_table->keys[index])
+    {
+        return -1;
+    }
+
+    hash_table->values[index] = value;
+    hash_table->size++;
+
+    return 0;
+} 
+
+int hashTableGet(struct hashTable* hash_table, const char* key)
+{
+    assert(hash_table);
+    assert(key);
+
+    return hashTableProbe(hash_table, GET_MODE, key, 0);
+}        
+  
+int hashTableRemove(struct hashTable* hash_table, const char* key)
+{
+    assert(hash_table);
+    assert(key);
+
+    return hashTableProbe(hash_table, REMOVE_MODE, key, 0);
+}
+
 //============================================================================
 int hashTableIsFull(struct hashTable* hash_table)
 {
@@ -513,7 +575,7 @@ void hashTableIteratorInit(struct hashTableIterator* hash_table_iterator, struct
     hash_table_iterator->index = 0;
 }
 
-long long int hashTableIteratorHasNext(struct hashTableIterator* hash_table_iterator)
+static long long int hashTableIteratorHasNext(struct hashTableIterator* hash_table_iterator)
 {
     assert(hash_table_iterator);
     
@@ -531,7 +593,7 @@ long long int hashTableIteratorHasNext(struct hashTableIterator* hash_table_iter
     return -1; 
 }
 
-long long int hashTableIteratorHasPrev(struct hashTableIterator* hash_table_iterator)
+static long long int hashTableIteratorHasPrev(struct hashTableIterator* hash_table_iterator)
 {
     assert(hash_table_iterator);
 
@@ -626,57 +688,5 @@ const char* hashTableIteratorGetByIndex(struct hashTableIterator* hash_table_ite
         count++;
     }
     return NULL;
-}
-//============================================================================
-int IsPrime(size_t n) 
-{
-    if (n < 2) 
-    {
-        return 0;
-    }
-    if (n == 2 || n == 3) 
-    {
-        return 1;
-    }
-    if (n % 2 == 0 || n % 3 == 0) 
-    {
-        return 0;
-    }
-    for (size_t i = 5; i * i <= n; i += 6) 
-    {
-        if (n % i == 0 || n % (i + 2) == 0) 
-        {
-            return 0;
-        }
-    }
-    
-    return 1;
-}
-
-size_t FindNearestPrime(size_t n, enum MODE_PRIME mode) 
-{
-    if (n < 2) return 2; 
-
-    size_t lower = n, upper = n;
-
-    while (1) 
-    {
-        if (mode == NEAREST_BIGGER)
-        {
-            if (IsPrime(upper)) 
-            {
-                return upper; 
-            }
-            upper++;
-        }
-        if (mode == NEAREST_LESSER)
-        {
-            if (IsPrime(lower)) 
-            {
-                return lower; 
-            }
-            lower = (lower > 2) ? lower - 1 : 2;
-        }
-    }
 }
 //============================================================================
