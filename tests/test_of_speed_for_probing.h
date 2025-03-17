@@ -18,7 +18,6 @@ void GenerateRandomKey(char *key, size_t length)
     key[length - 1] = '\0';
 }
 
-// Замер времени выполнения функции
 double MeasureTime(void (*test_hash_function)(struct hashTable*, char**, int), struct hashTable* table, char** keys, int num_keys) 
 {
     clock_t start = clock();
@@ -26,7 +25,6 @@ double MeasureTime(void (*test_hash_function)(struct hashTable*, char**, int), s
     return (double)(clock() - start)/CLOCKS_PER_SEC;
 }
 
-// Функции для тестирования вставки, поиска и удаления
 void TestInsert(struct hashTable* table, char** keys, int num_keys) 
 {
     for (int i = 0; i < num_keys; i++) 
