@@ -6,7 +6,7 @@
 #include <string.h>
 #include <assert.h>
 
-#include "hash_table.h"
+#include "../hash_table/hash_table.h"
 
 void TestHashTableInsertAndGet() 
 {

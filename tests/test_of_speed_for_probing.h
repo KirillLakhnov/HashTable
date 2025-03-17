@@ -5,7 +5,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
-#include "hash_table.h"
+
+#include "../hash_table/hash_table.h"
 
 void GenerateRandomKey(char *key, size_t length) 
 {
