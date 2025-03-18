@@ -8,10 +8,10 @@
 
 #include "../hash_table/hash_table.h"
 
-void TestHashTableInsertAndGet() 
+void testHashTableInsertAndGet() 
 {
-    struct hashTable table = {};
-    hashTableCtor(&table, MurmurHashFunction, 10, LINEAR_PROBE);
+    HashTable table = {};
+    hashTableCtor(&table, murmurHashFunction, 10, LINEAR_PROBE);
 
     hashTableInsert(&table, "apple", 50);
     hashTableInsert(&table, "banana", 200);
@@ -28,10 +28,10 @@ void TestHashTableInsertAndGet()
 
     hashTableDtor(&table);
 }
-void TestHashTableRemove() 
+void testHashTableRemove() 
 {
-    struct hashTable table = {};
-    hashTableCtor(&table, MurmurHashFunction, 10, QUADRATIC_PROBE);
+    HashTable table = {};
+    hashTableCtor(&table, murmurHashFunction, 10, QUADRATIC_PROBE);
 
     hashTableInsert(&table, "apple", 100);
     hashTableDumpToFile(&table, "log_file.log");
@@ -45,10 +45,10 @@ void TestHashTableRemove()
 
     hashTableDtor(&table);
 }
-void TestHashTableCollisions() 
+void testHashTableCollisions() 
 {
-    struct hashTable table = {};
-    hashTableCtor(&table, MurmurHashFunction, 10, HASH_PROBE); // Маленький размер для создания коллизий
+    HashTable table = {};
+    hashTableCtor(&table, murmurHashFunction, 10, HASH_PROBE); // Маленький размер для создания коллизий
 
     hashTableInsert(&table, "one", 1);
     hashTableInsert(&table, "two", 2);
@@ -68,10 +68,10 @@ void TestHashTableCollisions()
 
     hashTableDtor(&table);
 }
-void TestHashTableResize() 
+void testHashTableResize() 
 {
-    struct hashTable table = {};
-    hashTableCtor(&table, MurmurHashFunction, 2, HASH_PROBE); 
+    HashTable table = {};
+    hashTableCtor(&table, murmurHashFunction, 2, HASH_PROBE); 
 
     hashTableInsert(&table, "a", 1); // Должно вызвать увеличение таблицы
     hashTableDumpToFile(&table, "log_file.log");
@@ -103,12 +103,12 @@ void TestHashTableResize()
     hashTableDtor(&table);
 }
 
-void AllTestsHashTable()
+void allTestsHashTable()
 {
-    TestHashTableInsertAndGet();
-    TestHashTableRemove();
-    TestHashTableCollisions();
-    TestHashTableResize();
+    testHashTableInsertAndGet();
+    testHashTableRemove();
+    testHashTableCollisions();
+    testHashTableResize();
 
     printf("\n🎉 Все тесты успешно пройдены!\n");
 }

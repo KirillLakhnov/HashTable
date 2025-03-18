@@ -4,10 +4,10 @@
 
 int main() 
 {
-    AllTestsHashTable();
-    AllTestsIteratorHashTable();
+    allTestsHashTable();
+    allTestsIteratorHashTable();
 
-    //TestOfSpeed();
+    //testOfSpeed();
 
     return 0;
 }

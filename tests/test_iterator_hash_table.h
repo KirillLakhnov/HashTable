@@ -8,10 +8,10 @@
 
 #include "../hash_table/hash_table.h"
 
-void TestIteratorNext() 
+void testIteratorNext() 
 {
-    struct hashTable table = {};
-    hashTableCtor(&table, MurmurHashFunction, 10, LINEAR_PROBE);
+    HashTable table = {};
+    hashTableCtor(&table, murmurHashFunction, 10, LINEAR_PROBE);
 
     hashTableInsert(&table, "apple", 100);
     hashTableInsert(&table, "banana", 200);
@@ -19,7 +19,7 @@ void TestIteratorNext()
 
     hashTableDumpToFile(&table, "log_file.log");
 
-    struct hashTableIterator it = {};
+    HashTableIterator it = {};
     hashTableIteratorInit(&it, &table);
 
     int value = 0;
@@ -40,10 +40,10 @@ void TestIteratorNext()
     hashTableDtor(&table);
 }
 
-void TestIteratorPrev() 
+void testIteratorPrev() 
 {
-    struct hashTable table = {};
-    hashTableCtor(&table, MurmurHashFunction, 10, HASH_PROBE);
+    HashTable table = {};
+    hashTableCtor(&table, murmurHashFunction, 10, HASH_PROBE);
 
     hashTableInsert(&table, "apple", 100);
     hashTableInsert(&table, "banana", 200);
@@ -51,7 +51,7 @@ void TestIteratorPrev()
 
     hashTableDumpToFile(&table, "log_file.log");
 
-    struct hashTableIterator it = {};
+    HashTableIterator it = {};
     hashTableIteratorInit(&it, &table);
 
     int value = 0;
@@ -73,10 +73,10 @@ void TestIteratorPrev()
     hashTableDtor(&table);
 }
 
-void TestIteratorGetByIndex() 
+void testIteratorGetByIndex() 
 {
-    struct hashTable table = {};
-    hashTableCtor(&table, MurmurHashFunction, 10, QUADRATIC_PROBE);
+    HashTable table = {};
+    hashTableCtor(&table, murmurHashFunction, 10, QUADRATIC_PROBE);
 
     hashTableInsert(&table, "apple", 100);
     hashTableInsert(&table, "banana", 200);
@@ -84,7 +84,7 @@ void TestIteratorGetByIndex()
 
     hashTableDumpToFile(&table, "log_file.log");
 
-    struct hashTableIterator it = {};
+    HashTableIterator it = {};
     hashTableIteratorInit(&it, &table);
 
     int value = 0;
@@ -106,10 +106,11 @@ void TestIteratorGetByIndex()
     hashTableDtor(&table);
 }
 
-void AllTestsIteratorHashTable() {
-    TestIteratorNext();
-    TestIteratorPrev();
-    TestIteratorGetByIndex();
+void allTestsIteratorHashTable() 
+{
+    testIteratorNext();
+    testIteratorPrev();
+    testIteratorGetByIndex();
 
     printf("\n🎉 Все тесты для итератора успешно пройдены!\n");
 }

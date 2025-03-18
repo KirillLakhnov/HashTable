@@ -8,7 +8,7 @@
 
 #include "../hash_table/hash_table.h"
 
-void GenerateRandomKey(char *key, size_t length) 
+void generateRandomKey(char *key, size_t length) 
 {
     static const char charset[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
     for (size_t i = 0; i < length - 1; i++) 
@@ -18,28 +18,28 @@ void GenerateRandomKey(char *key, size_t length)
     key[length - 1] = '\0';
 }
 
-double MeasureTime(void (*test_hash_function)(struct hashTable*, char**, int), struct hashTable* table, char** keys, int num_keys) 
+double measureTime(void (*test_hash_function)(HashTable*, char**, int), HashTable* table, char** keys, int num_keys) 
 {
     clock_t start = clock();
     test_hash_function(table, keys, num_keys);
     return (double)(clock() - start)/CLOCKS_PER_SEC;
 }
 
-void TestInsert(struct hashTable* table, char** keys, int num_keys) 
+void testInsert(HashTable* table, char** keys, int num_keys) 
 {
     for (int i = 0; i < num_keys; i++) 
     {
         hashTableInsert(table, keys[i], i);
     }
 }
-void TestSearch(struct hashTable* table, char** keys, int num_keys) 
+void testSearch(HashTable* table, char** keys, int num_keys) 
 {
     for (int i = 0; i < num_keys; i++) 
     {
         hashTableGet(table, keys[i]);
     }
 }
-void TestRemove(struct hashTable* table, char** keys, int num_keys) 
+void testRemove(HashTable* table, char** keys, int num_keys) 
 {
     for (int i = 0; i < num_keys; i++) 
     {
@@ -47,7 +47,7 @@ void TestRemove(struct hashTable* table, char** keys, int num_keys)
     }
 }
 
-void TestOfSpeed() 
+void testOfSpeed() 
 {
     srand(time(NULL));
 
@@ -61,31 +61,31 @@ void TestOfSpeed()
         char key_i[key_length];
         keys[i] = key_i;
 
-        GenerateRandomKey(keys[i], key_length);
+        generateRandomKey(keys[i], key_length);
     }
 
-    struct hashTable table_linear    = {};
-    struct hashTable table_quadratic = {};
-    struct hashTable table_double    = {};
+    HashTable table_linear    = {};
+    HashTable table_quadratic = {};
+    HashTable table_double    = {};
 
-    hashTableCtor(&table_linear,    WorseHashFunction, num_keys * 1.2, LINEAR_PROBE);
-    hashTableCtor(&table_quadratic, WorseHashFunction, num_keys * 1.2, QUADRATIC_PROBE);
-    hashTableCtor(&table_double,    WorseHashFunction, num_keys * 1.2, HASH_PROBE);
+    hashTableCtor(&table_linear,    worseHashFunction, num_keys * 1.2, LINEAR_PROBE);
+    hashTableCtor(&table_quadratic, worseHashFunction, num_keys * 1.2, QUADRATIC_PROBE);
+    hashTableCtor(&table_double,    worseHashFunction, num_keys * 1.2, HASH_PROBE);
 
     printf("\n🔹 Вставка:\n");
-    printf("Линейное пробирование:  %.6f сек\n",    MeasureTime(TestInsert, &table_linear,    keys, num_keys));
-    printf("Квадратичное пробирование: %.6f сек\n", MeasureTime(TestInsert, &table_quadratic, keys, num_keys));
-    printf("Двойное хеширование:  %.6f сек\n",      MeasureTime(TestInsert, &table_double,    keys, num_keys));
+    printf("Линейное пробирование:  %.6f сек\n",    measureTime(testInsert, &table_linear,    keys, num_keys));
+    printf("Квадратичное пробирование: %.6f сек\n", measureTime(testInsert, &table_quadratic, keys, num_keys));
+    printf("Двойное хеширование:  %.6f сек\n",      measureTime(testInsert, &table_double,    keys, num_keys));
 
     printf("\n🔍 Поиск:\n");
-    printf("Линейное пробирование:  %.6f сек\n",    MeasureTime(TestSearch, &table_linear,    keys, num_keys));
-    printf("Квадратичное пробирование: %.6f сек\n", MeasureTime(TestSearch, &table_quadratic, keys, num_keys));
-    printf("Двойное хеширование:  %.6f сек\n",      MeasureTime(TestSearch, &table_double,    keys, num_keys));
+    printf("Линейное пробирование:  %.6f сек\n",    measureTime(testSearch, &table_linear,    keys, num_keys));
+    printf("Квадратичное пробирование: %.6f сек\n", measureTime(testSearch, &table_quadratic, keys, num_keys));
+    printf("Двойное хеширование:  %.6f сек\n",      measureTime(testSearch, &table_double,    keys, num_keys));
 
     printf("\n❌ Удаление:\n");
-    printf("Линейное пробирование:  %.6f сек\n",    MeasureTime(TestRemove, &table_linear,    keys, num_keys));
-    printf("Квадратичное пробирование: %.6f сек\n", MeasureTime(TestRemove, &table_quadratic, keys, num_keys));
-    printf("Двойное хеширование:  %.6f сек\n",      MeasureTime(TestRemove, &table_double,    keys, num_keys));
+    printf("Линейное пробирование:  %.6f сек\n",    measureTime(testRemove, &table_linear,    keys, num_keys));
+    printf("Квадратичное пробирование: %.6f сек\n", measureTime(testRemove, &table_quadratic, keys, num_keys));
+    printf("Двойное хеширование:  %.6f сек\n",      measureTime(testRemove, &table_double,    keys, num_keys));
 
     hashTableDtor(&table_linear);
     hashTableDtor(&table_quadratic);
