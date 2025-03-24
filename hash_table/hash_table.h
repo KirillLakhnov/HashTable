@@ -8,7 +8,8 @@
 
 #define DELETED_ELEMENT (char*)-1
 
-enum PROBE {
+enum PROBE 
+{
     LINEAR_PROBE    = 0,
     QUADRATIC_PROBE = 1,
     HASH_PROBE = 2,
@@ -27,7 +28,8 @@ typedef struct HashTable
     enum PROBE probe;
 } HashTable;
 
-typedef struct HashTableIterator{
+typedef struct HashTableIterator
+{
     HashTable* hash_table;
     size_t index;
 } HashTableIterator;

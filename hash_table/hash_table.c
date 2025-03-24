@@ -15,12 +15,14 @@
             break;                                                          \
     }
 
-enum MODE_PRIME {
+enum MODE_PRIME 
+{
     NEAREST_LESSER = 0,
     NEAREST_BIGGER = 1,
 };
 
-enum PROBE_MODE {
+enum PROBE_MODE 
+{
     INSERT_MODE = 0,
     GET_MODE    = 1,
     REMOVE_MODE = 2,
