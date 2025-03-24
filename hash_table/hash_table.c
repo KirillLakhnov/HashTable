@@ -1,5 +1,20 @@
 #include "hash_table.h"
 
+#define PROBE_ALGORITHM(index, capacity)                                    \
+    offset++;                                                               \
+    switch(hash_table->probe)                                               \
+    {                                                                       \
+        case(LINEAR_PROBE):                                                 \
+            index = (initial_index + offset) % capacity;                    \
+            break;                                                          \
+        case(QUADRATIC_PROBE):                                              \
+            index = (initial_index + offset*offset) % capacity;             \
+            break;                                                          \
+        case(HASH_PROBE):                                                   \
+            index = (hash1 + offset*hash2) % capacity;                      \
+            break;                                                          \
+    }
+
 enum MODE_PRIME {
     NEAREST_LESSER = 0,
     NEAREST_BIGGER = 1,
@@ -9,7 +24,6 @@ enum PROBE_MODE {
     INSERT_MODE = 0,
     GET_MODE    = 1,
     REMOVE_MODE = 2,
-    RESIZE_MODE = 3,
 };
 //============================================================================
 static int isPrime(size_t n) 
@@ -166,19 +180,7 @@ static int hashTableProbe(HashTable* hash_table, enum PROBE_MODE probe_mode, con
             }
         }
 
-        offset++;
-        switch(hash_table->probe)
-        {
-            case(LINEAR_PROBE):
-                index = (initial_index + offset) % hash_table->capacity;
-                break;
-            case(QUADRATIC_PROBE):
-                index = (initial_index + offset*offset) % hash_table->capacity;
-                break;
-            case(HASH_PROBE):
-                index = (hash1 + offset*hash2) % hash_table->capacity;
-                break;
-        }
+        PROBE_ALGORITHM(index, hash_table->capacity);
     }
 
     return (probe_mode == INSERT_MODE) ? index : -1;
@@ -280,25 +282,12 @@ int hashTableResize(HashTable* hash_table, size_t new_capacity)
             int hash2 = 1 + (hash1 % (new_capacity - 1));
 
             int new_index = hash1 % new_capacity;
-            int new_initial_index = new_index;
+            int initial_index = new_index;
             int offset = 0;
             
             while (new_keys[new_index] != NULL) 
             {
-                offset++;
-
-                switch(hash_table->probe)
-                {
-                    case(LINEAR_PROBE):
-                        new_index = (new_initial_index + offset) % new_capacity;
-                        break;
-                    case(QUADRATIC_PROBE):
-                        new_index = (new_initial_index + offset*offset) % new_capacity;
-                        break;
-                    case(HASH_PROBE):
-                        new_index = (hash1 + offset*hash2) % new_capacity;
-                        break;
-                }
+                PROBE_ALGORITHM(new_index, new_capacity);
             }
 
             new_keys[new_index]   = hash_table->keys[i];
@@ -378,19 +367,7 @@ void hashTableDump(HashTable* hash_table)
 
             while (index != i)
             {
-                offset++;
-                switch (hash_table->probe)
-                {
-                    case(LINEAR_PROBE):
-                        index = (initial_index + offset) % hash_table->capacity;
-                        break;
-                    case(QUADRATIC_PROBE):
-                        index = (initial_index + offset*offset) % hash_table->capacity;
-                        break;
-                    case(HASH_PROBE):
-                        index = (hash1 + offset*hash2) % hash_table->capacity;
-                        break;
-                }
+                PROBE_ALGORITHM(index, hash_table->capacity);
                 probes++;
             }
 
@@ -486,19 +463,7 @@ void hashTableDumpToFile(HashTable* hash_table, const char* filename)
 
             while (index != i)
             {
-                offset++;
-                switch (hash_table->probe)
-                {
-                    case(LINEAR_PROBE):
-                        index = (initial_index + offset) % hash_table->capacity;
-                        break;
-                    case(QUADRATIC_PROBE):
-                        index = (initial_index + offset*offset) % hash_table->capacity;
-                        break;
-                    case(HASH_PROBE):
-                        index = (hash1 + offset*hash2) % hash_table->capacity;
-                        break;
-                }
+                PROBE_ALGORITHM(index, hash_table->capacity);
                 probes++;
             }
 
