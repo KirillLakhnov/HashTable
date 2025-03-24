@@ -29,7 +29,7 @@
 
 **Формула линейного пробирования**:
 ```c
-    index = (index + offset) % hash_table->capacity;
+    index = (initial_index + offset) % hash_table->capacity;
 ```
 
 ---
@@ -41,7 +41,7 @@
 
 **Формула квадратичного пробирования**:
 ```c
-    index = (index + offset * offset) % hash_table->capacity;
+    index = (index_index + offset * offset) % hash_table->capacity;
 ```
 
 ---

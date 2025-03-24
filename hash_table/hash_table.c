@@ -8,10 +8,10 @@
             index = (initial_index + offset) % capacity;                    \
             break;                                                          \
         case(QUADRATIC_PROBE):                                              \
-            index = (initial_index + offset*offset) % capacity;             \
+            index = (initial_index + offset * offset) % capacity;           \
             break;                                                          \
         case(HASH_PROBE):                                                   \
-            index = (hash1 + offset*hash2) % capacity;                      \
+            index = (hash1 + offset * hash2) % capacity;                    \
             break;                                                          \
     }
 
