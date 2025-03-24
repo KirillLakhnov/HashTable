@@ -112,6 +112,8 @@ int hashTableCtor(HashTable* hash_table, int (*hash_function)(const char*, int),
 void hashTableDtor(HashTable* hash_table)
 {
     assert(hash_table);
+    assert(hash_table->keys);
+    assert(hash_table->values);
 
     for(size_t i = 0; i < hash_table->capacity; i++)
     {
@@ -134,6 +136,8 @@ void hashTableDtor(HashTable* hash_table)
 static int hashTableProbe(HashTable* hash_table, enum PROBE_MODE probe_mode, const char* key)
 {
     assert(hash_table);
+    assert(hash_table->keys);
+    assert(hash_table->values);
     assert(key);
 
     int hash1 = hash_table->hash_function(key, hash_table->capacity);
@@ -191,6 +195,8 @@ static int hashTableProbe(HashTable* hash_table, enum PROBE_MODE probe_mode, con
 int hashTableInsert(HashTable* hash_table, const char* key, int value)
 {
     assert(hash_table);
+    assert(hash_table->keys);
+    assert(hash_table->values);
     assert(key);
 
     if (hashTableIsFull(hash_table)) 
@@ -220,6 +226,8 @@ int hashTableInsert(HashTable* hash_table, const char* key, int value)
 int hashTableGet(HashTable* hash_table, const char* key)
 {
     assert(hash_table);
+    assert(hash_table->keys);
+    assert(hash_table->values);
     assert(key);
 
     return hashTableProbe(hash_table, GET_MODE, key);
@@ -228,6 +236,8 @@ int hashTableGet(HashTable* hash_table, const char* key)
 int hashTableRemove(HashTable* hash_table, const char* key)
 {
     assert(hash_table);
+    assert(hash_table->keys);
+    assert(hash_table->values);
     assert(key);
 
     return hashTableProbe(hash_table, REMOVE_MODE, key);
@@ -237,6 +247,8 @@ int hashTableRemove(HashTable* hash_table, const char* key)
 int hashTableIsFull(HashTable* hash_table)
 {
     assert(hash_table);
+    assert(hash_table->keys);
+    assert(hash_table->values);
 
     if(hash_table->size >= hash_table->capacity - 1) 
     {
@@ -253,6 +265,8 @@ int hashTableIsFull(HashTable* hash_table)
 int hashTableResize(HashTable* hash_table, size_t new_capacity)
 {
     assert(hash_table);
+    assert(hash_table->keys);
+    assert(hash_table->values);
 
     if(isPrime(new_capacity) != 1)
     {
@@ -310,6 +324,8 @@ int hashTableResize(HashTable* hash_table, size_t new_capacity)
 void hashTableClear(HashTable* hash_table)
 {
     assert(hash_table);
+    assert(hash_table->keys);
+    assert(hash_table->values);
 
     for (size_t i = 0; i < hash_table->capacity; i++)
     {
@@ -329,6 +345,8 @@ void hashTableClear(HashTable* hash_table)
 void hashTableDump(HashTable* hash_table)
 {
     assert(hash_table);
+    assert(hash_table->keys);
+    assert(hash_table->values);
 
     double load_factor = (double)(hash_table->size / hash_table->capacity);
     int total_collisions  = 0;
@@ -417,6 +435,8 @@ void hashTableDump(HashTable* hash_table)
 void hashTableDumpToFile(HashTable* hash_table, const char* filename)
 {
     assert(hash_table);
+    assert(hash_table->keys);
+    assert(hash_table->values);
     assert(filename);
 
     FILE* file = fopen(filename, "a");
@@ -552,6 +572,8 @@ void hashTableIteratorInit(HashTableIterator* hash_table_iterator, HashTable* ha
 {
     assert(hash_table_iterator);
     assert(hash_table);
+    assert(hash_table->keys);
+    assert(hash_table->values);
 
     hash_table_iterator->hash_table = hash_table;
     hash_table_iterator->index = 0;
