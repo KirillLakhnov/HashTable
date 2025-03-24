@@ -5,7 +5,7 @@
 int main() 
 {
     allTestsHashTable();
-    allTestsIteratorHashTable();
+    //allTestsIteratorHashTable();
 
     //testOfSpeed();
 

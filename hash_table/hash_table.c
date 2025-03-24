@@ -9,6 +9,7 @@ enum PROBE_MODE {
     INSERT_MODE = 0,
     GET_MODE    = 1,
     REMOVE_MODE = 2,
+    RESIZE_MODE = 3,
 };
 //============================================================================
 static int isPrime(size_t n) 
@@ -70,14 +71,8 @@ int hashTableCtor(HashTable* hash_table, int (*hash_function)(const char*, int),
 
     hash_table->size = 0;
     hash_table->probe = probe;
-    if(probe == HASH_PROBE)
-    {
-        hash_table->capacity = findNearestPrime(capacity, NEAREST_BIGGER);
-    }
-    else
-    {
-        hash_table->capacity = capacity;
-    }
+
+    hash_table->capacity = findNearestPrime(capacity, NEAREST_BIGGER);
 
     hash_table->keys = (char**)calloc(hash_table->capacity, sizeof(char*));
     if(!hash_table->keys)
@@ -114,16 +109,22 @@ void hashTableDtor(HashTable* hash_table)
         }
     }
 
+    hash_table->capacity = 0;
+    
     free(hash_table->keys);
     free(hash_table->values);
 }
 //============================================================================
-static int hashTableProbe(HashTable* hash_table, enum PROBE_MODE probe_mode, const char* key, int value)
+static int hashTableProbe(HashTable* hash_table, enum PROBE_MODE probe_mode, const char* key)
 {
+    assert(hash_table);
+    assert(key);
+
     int hash1 = hash_table->hash_function(key, hash_table->capacity);
     int hash2 = 1 + (hash1 % (hash_table->capacity - 1));
 
     int index = hash1 % hash_table->capacity;
+    int initial_index = index;
     int offset = 0;
 
     while(hash_table->keys[index] != NULL)
@@ -141,51 +142,38 @@ static int hashTableProbe(HashTable* hash_table, enum PROBE_MODE probe_mode, con
         {
             if (probe_mode == INSERT_MODE)
             {
-                hash_table->values[index] = value;
+                return index;
+            }
+            else if (probe_mode == GET_MODE)
+            {
+                return hash_table->values[index];
+            }
+            else if (probe_mode == REMOVE_MODE)
+            {
+                free(hash_table->keys[index]);
+    
+                hash_table->keys[index] = DELETED_ELEMENT;
+                hash_table->size--;
+
+                if(hash_table->size <= ((hash_table->capacity/2) - 1))
+                {
+                    size_t new_capacity = findNearestPrime(hash_table->capacity/2, NEAREST_BIGGER);
+
+                    assert(hashTableResize(hash_table, new_capacity) == 0);
+                }
+
                 return 0;
             }
-            else
-            {
-                if (probe_mode == GET_MODE)
-                {
-                    return hash_table->values[index];
-                }
-                else if (probe_mode == REMOVE_MODE)
-                {
-                    free(hash_table->keys[index]);
-        
-                    hash_table->keys[index] = DELETED_ELEMENT;
-                    hash_table->size--;
-
-                    if(hash_table->size <= ((hash_table->capacity/2) - 1))
-                    {
-                        size_t new_capacity = 0;
-
-                        if (hash_table->probe == HASH_PROBE)
-                        {
-                            new_capacity = findNearestPrime(hash_table->capacity/2, NEAREST_BIGGER);
-                        }
-                        else
-                        {
-                            new_capacity = hash_table->capacity/2;
-                        }
-
-                        assert(hashTableResize(hash_table, new_capacity) == 0);
-                    }
-
-                    return 0;
-                }
-            }   
         }
 
         offset++;
         switch(hash_table->probe)
         {
             case(LINEAR_PROBE):
-                index = (index + offset) % hash_table->capacity;
+                index = (initial_index + offset) % hash_table->capacity;
                 break;
             case(QUADRATIC_PROBE):
-                index = (index + offset*offset) % hash_table->capacity;
+                index = (initial_index + offset*offset) % hash_table->capacity;
                 break;
             case(HASH_PROBE):
                 index = (hash1 + offset*hash2) % hash_table->capacity;
@@ -203,16 +191,7 @@ int hashTableInsert(HashTable* hash_table, const char* key, int value)
 
     if (hashTableIsFull(hash_table)) 
     {
-        size_t new_capacity = 0;
-
-        if (hash_table->probe == HASH_PROBE)
-        {
-            new_capacity = findNearestPrime(hash_table->capacity * 2, NEAREST_BIGGER);
-        }
-        else
-        {
-            new_capacity = hash_table->capacity * 2;
-        }
+        size_t new_capacity = findNearestPrime(hash_table->capacity * 2, NEAREST_BIGGER);
 
         if (hashTableResize(hash_table, new_capacity) == -1)
         {
@@ -220,7 +199,7 @@ int hashTableInsert(HashTable* hash_table, const char* key, int value)
         }
     }
 
-    int index = hashTableProbe(hash_table, INSERT_MODE, key, value);
+    int index = hashTableProbe(hash_table, INSERT_MODE, key);
 
     hash_table->keys[index] = strdup(key);
     if (!hash_table->keys[index])
@@ -239,7 +218,7 @@ int hashTableGet(HashTable* hash_table, const char* key)
     assert(hash_table);
     assert(key);
 
-    return hashTableProbe(hash_table, GET_MODE, key, 0);
+    return hashTableProbe(hash_table, GET_MODE, key);
 }        
   
 int hashTableRemove(HashTable* hash_table, const char* key)
@@ -247,7 +226,7 @@ int hashTableRemove(HashTable* hash_table, const char* key)
     assert(hash_table);
     assert(key);
 
-    return hashTableProbe(hash_table, REMOVE_MODE, key, 0);
+    return hashTableProbe(hash_table, REMOVE_MODE, key);
 }
 
 //============================================================================
@@ -271,6 +250,16 @@ int hashTableResize(HashTable* hash_table, size_t new_capacity)
 {
     assert(hash_table);
 
+    if(isPrime(new_capacity) != 1)
+    {
+        new_capacity = findNearestPrime(new_capacity, NEAREST_BIGGER);
+    }
+
+    if(new_capacity < hash_table->size)
+    {
+        return -1;
+    }
+
     char** new_keys = (char**)calloc(new_capacity, sizeof(char*));
     if(!new_keys)
     {
@@ -287,11 +276,29 @@ int hashTableResize(HashTable* hash_table, size_t new_capacity)
     {
         if (hash_table->keys[i] != NULL && hash_table->keys[i] != DELETED_ELEMENT) 
         {
-            int new_index = hash_table->hash_function(hash_table->keys[i], new_capacity);
+            int hash1 = hash_table->hash_function(hash_table->keys[i], new_capacity);
+            int hash2 = 1 + (hash1 % (new_capacity - 1));
+
+            int new_index = hash1 % new_capacity;
+            int new_initial_index = new_index;
+            int offset = 0;
             
             while (new_keys[new_index] != NULL) 
             {
-                new_index = (new_index + 1) % new_capacity;
+                offset++;
+
+                switch(hash_table->probe)
+                {
+                    case(LINEAR_PROBE):
+                        new_index = (new_initial_index + offset) % new_capacity;
+                        break;
+                    case(QUADRATIC_PROBE):
+                        new_index = (new_initial_index + offset*offset) % new_capacity;
+                        break;
+                    case(HASH_PROBE):
+                        new_index = (hash1 + offset*hash2) % new_capacity;
+                        break;
+                }
             }
 
             new_keys[new_index]   = hash_table->keys[i];
@@ -360,9 +367,13 @@ void hashTableDump(HashTable* hash_table)
         }
         else
         {
-            int hash = hash_table->hash_function(hash_table->keys[i], hash_table->capacity);
+            int hash1 = hash_table->hash_function(hash_table->keys[i], hash_table->capacity);
+            int hash2 = 1 + (hash1 % (hash_table->capacity - 1));
+
+            size_t index = hash1 % hash_table->capacity;
+            size_t initial_index = index;
+
             int probes = 0;
-            size_t index = hash % hash_table->capacity;
             int offset = 0;
 
             while (index != i)
@@ -370,14 +381,14 @@ void hashTableDump(HashTable* hash_table)
                 offset++;
                 switch (hash_table->probe)
                 {
-                    case LINEAR_PROBE:
-                        index = (hash + offset) % hash_table->capacity;
+                    case(LINEAR_PROBE):
+                        index = (initial_index + offset) % hash_table->capacity;
                         break;
-                    case QUADRATIC_PROBE:
-                        index = (hash + offset * offset) % hash_table->capacity;
+                    case(QUADRATIC_PROBE):
+                        index = (initial_index + offset*offset) % hash_table->capacity;
                         break;
-                    case HASH_PROBE:
-                        index = (hash + offset * (1 + (hash % (hash_table->capacity - 1)))) % hash_table->capacity;
+                    case(HASH_PROBE):
+                        index = (hash1 + offset*hash2) % hash_table->capacity;
                         break;
                 }
                 probes++;
@@ -397,7 +408,7 @@ void hashTableDump(HashTable* hash_table)
                 max_probe_length = probes;
             }
 
-            printf("| %-5zu | %-20s | %-10d | %-10d | %-8d |\n", i, hash_table->keys[i], hash_table->values[i], hash, probes);
+            printf("| %-5zu | %-20s | %-10d | %-10d | %-8d |\n", i, hash_table->keys[i], hash_table->values[i], hash1, probes);
         }
     }
 
@@ -464,9 +475,13 @@ void hashTableDumpToFile(HashTable* hash_table, const char* filename)
         }
         else
         {
-            int hash = hash_table->hash_function(hash_table->keys[i], hash_table->capacity);
+            int hash1 = hash_table->hash_function(hash_table->keys[i], hash_table->capacity);
+            int hash2 = 1 + (hash1 % (hash_table->capacity - 1));
+
+            size_t index = hash1 % hash_table->capacity;
+            size_t initial_index = index;
+
             int probes = 0;
-            size_t index = hash % hash_table->capacity;
             int offset = 0;
 
             while (index != i)
@@ -474,14 +489,14 @@ void hashTableDumpToFile(HashTable* hash_table, const char* filename)
                 offset++;
                 switch (hash_table->probe)
                 {
-                    case LINEAR_PROBE:
-                        index = (hash + offset) % hash_table->capacity;
+                    case(LINEAR_PROBE):
+                        index = (initial_index + offset) % hash_table->capacity;
                         break;
-                    case QUADRATIC_PROBE:
-                        index = (hash + offset * offset) % hash_table->capacity;
+                    case(QUADRATIC_PROBE):
+                        index = (initial_index + offset*offset) % hash_table->capacity;
                         break;
-                    case HASH_PROBE:
-                        index = (hash + offset * (1 + (hash % (hash_table->capacity - 1)))) % hash_table->capacity;
+                    case(HASH_PROBE):
+                        index = (hash1 + offset*hash2) % hash_table->capacity;
                         break;
                 }
                 probes++;
@@ -501,7 +516,7 @@ void hashTableDumpToFile(HashTable* hash_table, const char* filename)
                 max_probe_length = probes;
             }
 
-            fprintf(file, "| %-5zu | %-20s | %-10d | %-10d | %-8d |\n", i, hash_table->keys[i], hash_table->values[i], hash, probes);
+            fprintf(file, "| %-5zu | %-20s | %-10d | %-10d | %-8d |\n", i, hash_table->keys[i], hash_table->values[i], hash1, probes);
         }
     }
 

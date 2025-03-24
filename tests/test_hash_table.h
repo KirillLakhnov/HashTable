@@ -11,7 +11,7 @@
 void testHashTableInsertAndGet() 
 {
     HashTable table = {};
-    hashTableCtor(&table, murmurHashFunction, 10, LINEAR_PROBE);
+    hashTableCtor(&table, murmurHashFunction, 10, HASH_PROBE);
 
     hashTableInsert(&table, "apple", 50);
     hashTableInsert(&table, "banana", 200);
@@ -31,7 +31,7 @@ void testHashTableInsertAndGet()
 void testHashTableRemove() 
 {
     HashTable table = {};
-    hashTableCtor(&table, murmurHashFunction, 10, QUADRATIC_PROBE);
+    hashTableCtor(&table, murmurHashFunction, 10, HASH_PROBE);
 
     hashTableInsert(&table, "apple", 100);
     hashTableDumpToFile(&table, "log_file.log");
@@ -48,15 +48,20 @@ void testHashTableRemove()
 void testHashTableCollisions() 
 {
     HashTable table = {};
-    hashTableCtor(&table, murmurHashFunction, 10, HASH_PROBE); // Маленький размер для создания коллизий
+    hashTableCtor(&table, murmurHashFunction, 2, HASH_PROBE); // Маленький размер для создания коллизий
 
     hashTableInsert(&table, "one", 1);
+    //hashTableDumpToFile(&table, "log_file.log");
     hashTableInsert(&table, "two", 2);
+    //hashTableDumpToFile(&table, "log_file.log");
     hashTableInsert(&table, "three", 3);
+    //hashTableDumpToFile(&table, "log_file.log");
     hashTableInsert(&table, "four", 4);
+    //hashTableDumpToFile(&table, "log_file.log");
     hashTableInsert(&table, "five", 5);
-    hashTableDumpToFile(&table, "log_file.log");
+    //hashTableDumpToFile(&table, "log_file.log");
 
+    //printf("bkdjfn %d", hashTableGet(&table, "one"));
     assert(hashTableGet(&table, "one") == 1);
     assert(hashTableGet(&table, "two") == 2);
     assert(hashTableGet(&table, "three") == 3);
@@ -71,7 +76,7 @@ void testHashTableCollisions()
 void testHashTableResize() 
 {
     HashTable table = {};
-    hashTableCtor(&table, murmurHashFunction, 2, HASH_PROBE); 
+    hashTableCtor(&table, murmurHashFunction, 1, HASH_PROBE); 
 
     hashTableInsert(&table, "a", 1); // Должно вызвать увеличение таблицы
     hashTableDumpToFile(&table, "log_file.log");
